@@ -24,6 +24,8 @@ static algo_t algos[NB_ALGOS] = {
     MP, KMP, BM, Horspool, QuickSearch
 };
 
+/* CLOCK_MONOTONIC évite qu'une modification de l'heure système perturbe
+   la durée mesurée. */
 static double maintenant(void) {
     struct timespec t;
     clock_gettime(CLOCK_MONOTONIC, &t);
@@ -36,9 +38,13 @@ int main(int argc, char **argv) {
     long n;
     int nb = 0, a, k;
 
-    if (argc < 3) { fprintf(stderr, "Usage: %s <texte> <mots>\n", argv[0]); return 1; }
+    if (argc < 3) {
+        fprintf(stderr, "Usage: %s <texte> <mots>\n", argv[0]);
+        return 1;
+    }
 
-    /* lecture du texte : n+1 octets, le dernier vaut '\0' (utile a QuickSearch) */
+    /* Le caractère nul final est réservé à QuickSearch, qui lit y[j + m]
+       lorsque la fenêtre atteint la fin du texte. */
     f = fopen(argv[1], "r");
     if (!f) { perror(argv[1]); return 1; }
     fseek(f, 0, SEEK_END); n = ftell(f); rewind(f);
@@ -46,7 +52,8 @@ int main(int argc, char **argv) {
     if (fread(y, 1, n, f) != (size_t)n) { fprintf(stderr, "lecture\n"); return 1; }
     fclose(f);
 
-    /* lecture des mots */
+    /* Les mots sont conservés en mémoire pour que chaque algorithme mesure
+       exactement le même jeu de données. */
     f = fopen(argv[2], "r");
     if (!f) { perror(argv[2]); return 1; }
     while (nb < MAX_MOTS && fgets(ligne, MAX_LEN, f)) {
@@ -55,6 +62,9 @@ int main(int argc, char **argv) {
     }
     fclose(f);
 
+    /* Le premier résultat sert de référence fonctionnelle pour les suivants.
+       Le chronométrage exclut volontairement la lecture et le prétraitement
+       des fichiers : il mesure uniquement les recherches. */
     long ref = -1;
     for (a = 0; a < NB_ALGOS; a++) {
         long total = 0;

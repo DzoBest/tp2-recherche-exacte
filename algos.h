@@ -1,9 +1,11 @@
 #ifndef ALGOS_H
 #define ALGOS_H
 
-/* Tous les algorithmes : x = mot (chaine terminee par '\0'), m = |x|,
-   y = texte (chaine terminee par '\0'), n = |y|.
-   Retour : nombre d'occurrences (chevauchantes comprises) de x dans y. */
+/* Contrat commun à tous les algorithmes :
+   x = mot terminé par '\0', m = longueur de x ;
+   y = texte terminé par '\0', n = longueur de y.
+   La recherche compte aussi les occurrences qui se chevauchent.
+   Une valeur négative signale une allocation temporaire impossible. */
 typedef int (*algo_t)(char *x, int m, char *y, int n);
 
 int naif_boucle(char *x, int m, char *y, int n);
