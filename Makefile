@@ -2,6 +2,8 @@ CC = gcc
 CFLAGS = -O2 -Wall -Wextra
 
 # La cible par défaut construit les deux générateurs et le banc de mesure.
+.PHONY: all clean check
+
 all: gen_texte gen_mots bench
 
 # alphabet.h est une dépendance : modifier l'alphabet invalide les générateurs.
@@ -14,6 +16,13 @@ gen_mots: gen_mots.c alphabet.h
 bench: bench.c algos.c algos.h
 	$(CC) $(CFLAGS) -o $@ bench.c algos.c
 
+# Vérifie les cas limites et les occurrences chevauchantes des 11 algorithmes.
+check: test_algos
+	./test_algos
+
+test_algos: test_algos.c algos.c algos.h
+	$(CC) $(CFLAGS) -o $@ test_algos.c algos.c
+
 # Supprime uniquement les artefacts produits par la compilation et l'expérience.
 clean:
-	rm -rf gen_texte gen_mots bench textes mots resultats.csv
+	rm -rf gen_texte gen_mots bench test_algos textes mots

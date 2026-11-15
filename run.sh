@@ -1,7 +1,7 @@
 #!/bin/bash
 # Reproduit l'expérience complète du TP :
 # génération des données, mesures, puis production du graphique.
-set -e
+set -euo pipefail
 
 # Une erreur de compilation ou d'exécution interrompt l'expérience pour éviter
 # de produire un CSV incomplet présenté comme un résultat valide.

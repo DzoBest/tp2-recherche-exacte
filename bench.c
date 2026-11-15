@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <limits.h>
 #include "algos.h"
 
 #define NB_ALGOS 11
@@ -47,9 +48,24 @@ int main(int argc, char **argv) {
        lorsque la fenêtre atteint la fin du texte. */
     f = fopen(argv[1], "r");
     if (!f) { perror(argv[1]); return 1; }
-    fseek(f, 0, SEEK_END); n = ftell(f); rewind(f);
+    if (fseek(f, 0, SEEK_END) != 0 || (n = ftell(f)) < 0 ||
+        fseek(f, 0, SEEK_SET) != 0 || n > INT_MAX) {
+        fprintf(stderr, "Impossible de déterminer la taille du texte\n");
+        fclose(f);
+        return 1;
+    }
     y = calloc(n + 1, 1);
-    if (fread(y, 1, n, f) != (size_t)n) { fprintf(stderr, "lecture\n"); return 1; }
+    if (!y) {
+        fprintf(stderr, "Allocation impossible pour le texte\n");
+        fclose(f);
+        return 1;
+    }
+    if (fread(y, 1, n, f) != (size_t)n) {
+        fprintf(stderr, "Erreur de lecture du texte\n");
+        free(y);
+        fclose(f);
+        return 1;
+    }
     fclose(f);
 
     /* Les mots sont conservés en mémoire pour que chaque algorithme mesure
@@ -58,7 +74,17 @@ int main(int argc, char **argv) {
     if (!f) { perror(argv[2]); return 1; }
     while (nb < MAX_MOTS && fgets(ligne, MAX_LEN, f)) {
         ligne[strcspn(ligne, "\n")] = '\0';
-        if (ligne[0]) mots[nb++] = strdup(ligne);
+        if (ligne[0]) {
+            mots[nb] = strdup(ligne);
+            if (!mots[nb]) {
+                fprintf(stderr, "Allocation impossible pour un mot\n");
+                for (k = 0; k < nb; k++) free(mots[k]);
+                free(y);
+                fclose(f);
+                return 1;
+            }
+            nb++;
+        }
     }
     fclose(f);
 
@@ -69,8 +95,18 @@ int main(int argc, char **argv) {
     for (a = 0; a < NB_ALGOS; a++) {
         long total = 0;
         double t0 = maintenant();
-        for (k = 0; k < nb; k++)
-            total += algos[a](mots[k], (int)strlen(mots[k]), y, (int)n);
+        for (k = 0; k < nb; k++) {
+            int occurrences = algos[a](
+                mots[k], (int)strlen(mots[k]), y, (int)n
+            );
+            if (occurrences < 0) {
+                fprintf(stderr, "Erreur mémoire dans %s\n", noms[a]);
+                for (k = 0; k < nb; k++) free(mots[k]);
+                free(y);
+                return 1;
+            }
+            total += occurrences;
+        }
         double t = maintenant() - t0;
         if (ref < 0) ref = total;
         else if (total != ref)
@@ -78,5 +114,7 @@ int main(int argc, char **argv) {
                     noms[a], total, ref);
         printf("%s %.6f %ld\n", noms[a], t, total);
     }
+    for (k = 0; k < nb; k++) free(mots[k]);
+    free(y);
     return 0;
 }

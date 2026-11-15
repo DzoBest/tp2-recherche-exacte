@@ -10,8 +10,7 @@ texte :
 - Horspool ;
 - Quick Search.
 
-Le résultat expérimental est disponible dans
-[courbes.png](./courbes.png). Les données brutes se trouvent dans
+Les données brutes se trouvent dans
 [resultats.csv](./resultats.csv).
 
 ## Reproduire l'expérience
@@ -42,10 +41,32 @@ Le protocole comporte donc :
 Les graines pseudo-aléatoires sont fixées dans le script afin de rendre
 l'expérience reproductible.
 
+## Vérifier la correction des algorithmes
+
+Avant de lancer l'expérience complète, exécuter :
+
+```bash
+make check
+```
+
+Cette cible compile [test_algos.c](./test_algos.c) et vérifie les onze
+algorithmes sur plusieurs cas représentatifs :
+
+- occurrences chevauchantes, par exemple `aa` dans `aaaa` ;
+- plusieurs occurrences indépendantes ;
+- mot absent ;
+- mot plus long que le texte ;
+- mot d'un seul caractère.
+
+Le test compare également le résultat de chaque algorithme à une valeur
+attendue. Une erreur provoque un code de sortie non nul, ce qui empêche de
+confondre une exécution réussie avec une validation partielle.
+
 ## Lecture du graphique
 
-![Comparaison des temps d'exécution des algorithmes selon la taille de
-l'alphabet et la longueur du mot](./courbes.png)
+<p align="center">
+  <img src="./courbes.png" alt="Comparaison des temps d'exécution des algorithmes selon la taille de l'alphabet et la longueur du mot">
+</p>
 
 *Figure 1 — Temps total de recherche pour les 100 mots générés, selon la
 taille de l'alphabet et la longueur du mot.*

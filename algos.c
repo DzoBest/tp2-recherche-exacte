@@ -188,8 +188,9 @@ static void suffixes(char *x, int m, int *suff) {
     }
 }
 
-static void preBmGs(char *x, int m, int bmGs[]) {
+static int preBmGs(char *x, int m, int bmGs[]) {
     int i, j, *suff = malloc(m * sizeof(int));
+    if (!suff) return 0;
     suffixes(x, m, suff);
     for (i = 0; i < m; ++i) bmGs[i] = m;
     j = 0;
@@ -200,6 +201,7 @@ static void preBmGs(char *x, int m, int bmGs[]) {
     for (i = 0; i <= m - 2; ++i)
         bmGs[m - 1 - suff[i]] = m - 1 - i;
     free(suff);
+    return 1;
 }
 
 int BM(char *x, int m, char *y, int n) {
@@ -208,7 +210,10 @@ int BM(char *x, int m, char *y, int n) {
     if (m > n || m == 0) return 0;
     bmGs = malloc(m * sizeof(int));
     if (!bmGs) return -1;
-    preBmGs(x, m, bmGs);
+    if (!preBmGs(x, m, bmGs)) {
+        free(bmGs);
+        return -1;
+    }
     preBmBc(x, m, bmBc);
     while (j <= n - m) {
         for (i = m - 1; i >= 0 && x[i] == y[i + j]; --i) ;
