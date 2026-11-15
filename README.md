@@ -44,6 +44,12 @@ l'expérience reproductible.
 
 ## Lecture du graphique
 
+![Comparaison des temps d'exécution des algorithmes selon la taille de
+l'alphabet et la longueur du mot](./courbes.png)
+
+*Figure 1 — Temps total de recherche pour les 100 mots générés, selon la
+taille de l'alphabet et la longueur du mot.*
+
 Chaque sous-graphique correspond à une taille d'alphabet. L'abscisse est la
 longueur du mot `m` et l'ordonnée est le temps total de recherche des
 100 mots. L'ordonnée est logarithmique : elle permet de comparer des temps
